@@ -1,21 +1,15 @@
 plone:
-    image: eeacms/plone:4.x
+  image: eeacms/plone-eea-pdf
   ports:
-  - "80:80"
+  - "8080:8080"
   environment:
-  - SOURCE_EEA_CONVERTER=git https://github.com/collective/eea.converter.git pushurl=git@github.com:collective/eea.converter.git
-  - SOURCE_EEA_PDF=git https://github.com/collective/eea.pdf.git pushurl=git@github.com:collective/eea.pdf.git
-  - BUILDOUT_EGGS=eea.pdf
-  - BUILDOUT_ZCML=plone.app.async-single_db_worker
   - EEADOWNLOADS_NAME=downloads
   - EEADOWNLOADS_PATH=/opt/zope/var/downloads/pdf
   - EEACONVERTER_TEMP=/opt/zope/var/downloads/tmp
-  - WKHTMLTOPDF_PATH=xvfb-run -a wkhtmltopdf
   links:
   - postfix
   volumes:
   - /etc/localtime:/etc/localtime:ro
-  - ./src:/opt/zope/src
   volumes_from:
   - data
 
@@ -28,7 +22,11 @@ postfix:
 
 data:
   image: busybox
+  tty: true
+  stdin_open: true
   volumes:
+  - /opt/zope/var/blobstorage
+  - /opt/zope/var/filestorage
   - /opt/zope/var/downloads/pdf
   - /opt/zope/var/downloads/tmp
-  command: chown -R 500:500 /opt/zope/var
+  command: ["chown", "-v", "-R", "500:500", "/opt/zope/var"]
